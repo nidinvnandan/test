@@ -29,6 +29,10 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
 
+from llm_guard.input_scanners import Toxicity
+from llm_guard.input_scanners.toxicity import MatchType
+from llm_guard.input_scanners import PromptInjection
+from llm_guard.input_scanners.prompt_injection import MatchType
 
 st.header("HR ChatBot")
 os.environ["GOOGLE_API_KEY"] = os.getenv('GOOGLE_API_KEY')
@@ -149,7 +153,9 @@ for i in range(0, len(st.session_state.chat_history), 2):
     st.markdown(f"<div class='bot-message'><strong>Bot:</strong> {ai_message}</div>", unsafe_allow_html=True)
 
 query = st.text_input('Enter the query')
-
+question = ''
+scanner = Toxicity(threshold=0.5, match_type=MatchType.SENTENCE)
+scanner1 = PromptInjection(threshold=0.5, match_type=MatchType.FULL)
 def answer_question(question):
     recent_history = st.session_state.chat_history[-14:] if len(st.session_state.chat_history) > 14 else st.session_state.chat_history
     ai_msg = rag_chain.invoke({"question": question, "chat_history": recent_history})
@@ -160,11 +166,20 @@ def answer_question(question):
     
 
 if st.button('➤'):
-    if query:
+    sanitized_prompt, is_valid, risk_score = scanner.scan(query)
+
+    if is_valid and risk_score < 0.5:  # Adjust the threshold as needed
+            sanitized_prompt, is_valid, risk_score = scanner1.scan(query)
+            if is_valid and risk_score < 0.5:  # Adjust the threshold as needed
+                    question=query
+                
+            else:
+                print("Prompt Injection detected.")
+    else:
+        print("Prompt is either invalid or toxic.")
+    if question:
         result = answer_question(query)
         st.markdown(result)
     else:
         st.write("Please enter a query.")
-        
-st.write(st.session_state.chat_history)
-st.write(len(st.session_state.chat_history))
+
