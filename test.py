@@ -176,6 +176,5 @@ if st.button('➤'):
     if question:
         result = answer_question(question)
         st.markdown(result)
-    else:
-        st.write("Please enter a query.")
+    
 
