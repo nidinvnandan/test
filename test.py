@@ -160,6 +160,11 @@ def scanner():
     scanner=Toxicity(threshold=0.5, match_type=MatchType.SENTENCE)
     return scanner
 scanner=scanner()
+@st.cache_resource
+def scanner1():
+    scanner1 = PromptInjection(threshold=0.5, match_type=MatchType.FULL)
+    return scanner1
+scanner1=scanner1()
 def answer_question(question):
     recent_history = st.session_state.chat_history[-14:] if len(st.session_state.chat_history) > 14 else st.session_state.chat_history
     ai_msg = rag_chain.invoke({"question": question, "chat_history": recent_history})
@@ -173,7 +178,11 @@ if st.button('➤'):
     sanitized_prompt, is_valid, risk_score = scanner.scan(query)
 
     if is_valid and risk_score < 0.5:  # Adjust the threshold as needed
-            question=query
+            sanitized_prompt, is_valid, risk_score = scanner1.scan(query)
+            if is_valid and risk_score < 0.5:  # Adjust the threshold as needed
+                        question=query
+            else:
+                st.write("queetion is towards prompt injection")   
     else:
         st.write("question is either invalid or toxic.")
     if question:
