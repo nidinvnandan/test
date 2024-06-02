@@ -155,7 +155,6 @@ for i in range(0, len(st.session_state.chat_history), 2):
 query = st.text_input('Enter the query')
 question = ''
 scanner = Toxicity(threshold=0.5, match_type=MatchType.SENTENCE)
-scanner1 = PromptInjection(threshold=0.5, match_type=MatchType.FULL)
 def answer_question(question):
     recent_history = st.session_state.chat_history[-14:] if len(st.session_state.chat_history) > 14 else st.session_state.chat_history
     ai_msg = rag_chain.invoke({"question": question, "chat_history": recent_history})
@@ -169,16 +168,11 @@ if st.button('➤'):
     sanitized_prompt, is_valid, risk_score = scanner.scan(query)
 
     if is_valid and risk_score < 0.5:  # Adjust the threshold as needed
-            sanitized_prompt, is_valid, risk_score = scanner1.scan(query)
-            if is_valid and risk_score < 0.5:  # Adjust the threshold as needed
-                    question=query
-                
-            else:
-                print("Prompt Injection detected.")
+            question=query
     else:
         print("Prompt is either invalid or toxic.")
     if question:
-        result = answer_question(query)
+        result = answer_question(question)
         st.markdown(result)
     else:
         st.write("Please enter a query.")
