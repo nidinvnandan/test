@@ -175,7 +175,7 @@ if st.button('➤'):
     if is_valid and risk_score < 0.5:  # Adjust the threshold as needed
             question=query
     else:
-        print("Prompt is either invalid or toxic.")
+        st.write("question is either invalid or toxic.")
     if question:
         result = answer_question(question)
         st.markdown(result)
