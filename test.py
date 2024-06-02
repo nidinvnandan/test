@@ -155,7 +155,7 @@ for i in range(0, len(st.session_state.chat_history), 2):
 query = st.text_input('Enter the query')
 question = ''
 
-@st.cache
+@st.cache_resource
 scanner = Toxicity(threshold=0.5, match_type=MatchType.SENTENCE)
 def answer_question(question):
     recent_history = st.session_state.chat_history[-14:] if len(st.session_state.chat_history) > 14 else st.session_state.chat_history
