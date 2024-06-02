@@ -156,7 +156,10 @@ query = st.text_input('Enter the query')
 question = ''
 
 @st.cache_resource
-scanner = Toxicity(threshold=0.5, match_type=MatchType.SENTENCE)
+def scanner():
+    scanner=Toxicity(threshold=0.5, match_type=MatchType.SENTENCE)
+    return scanner
+scanner=scanner()
 def answer_question(question):
     recent_history = st.session_state.chat_history[-14:] if len(st.session_state.chat_history) > 14 else st.session_state.chat_history
     ai_msg = rag_chain.invoke({"question": question, "chat_history": recent_history})
